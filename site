@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 ACHAW | Dark Mode Şarkı Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* TAMAMEN DARK MODE */
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-darker: #050505;
+            --bg-panel: #111111;
+            --bg-card: #1a1a1a;
+            --text-main: #ffffff;
+            --text-secondary: #aaaaaa;
+            --accent: #00ff88;
+            --accent-glow: rgba(0, 255, 136, 0.3);
+            --border: #333333;
+            --danger: #ff4444;
+            --warning: #ffaa00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Glitch efekti için arka plan */
+        .glitch-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(45deg, transparent 49%, var(--accent-glow) 50%, transparent 51%),
+                linear-gradient(-45deg, transparent 49%, var(--accent-glow) 50%, transparent 51%);
+            background-size: 50px 50px;
+            opacity: 0.03;
+            z-index: -1;
+            animation: glitchMove 20s linear infinite;
+        }
+
+        /* Ana container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--bg-dark);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--accent), #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        /* SÜRÜKLƏ & TAŞI Alanı */
+        .drop-zone {
+            background: var(--bg-panel);
+            border: 2px dashed var(--border);
+            border-radius: 15px;
+            padding: 60px 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+
+        .drop-zone.dragover {
+            border-color: var(--accent);
+            background: var(--bg-card);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .drop-icon {
+            font-size: 48px;
+            color: var(--accent);
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .drop-text {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .drop-subtext {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* MENÜ */
+        .menu {
+            background: var(--bg-panel);
+            border-radius: 15px;
+            padding: 0;
+            margin-bottom: 30px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .menu-header {
+            background: var(--bg-card);
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .menu-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .menu-title i {
+            color: var(--accent);
+        }
+
+        .menu-content {
+            padding: 20px;
+        }
+
+        .menu-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .menu-items {
+            display: grid;
+            gap: 10px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .menu-item:hover {
+            border-color: var(--accent);
+            background: rgba(0, 255, 136, 0.05);
+            transform: translateX(5px);
+        }
+
+        .menu-item.active {
+            border-color: var(--accent);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .item-icon {
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+        }
+
+        .item-text {
+            font-size: 14px;
+        }
+
+        .item-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            background: var(--accent);
+            color: var(--bg-dark);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .switch {
+            width: 40px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .switch.active {
+            background: var(--accent);
+        }
+
+        .switch-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .switch.active .switch-knob {
+            transform: translateX(20px);
+        }
+
+        /* Şarkı Player */
+        .player-section {
+            background: var(--bg-panel);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .now-playing {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .album-art {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #00ff88, #0088ff);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .song-info h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .song-info p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .player-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 30%;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .control-btn.play {
+            width: 60px;
+            height: 60px;
+            background: var(--accent);
+            color: var(--bg-dark);
+            font-size: 20px;
+        }
+
+        .control-btn.play:hover {
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* Lyrics Display */
+        .lyrics-container {
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .lyrics-line {
+            padding: 8px 0;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .lyrics-line.active {
+            color: var(--accent);
+            font-weight: 600;
+            transform: scale(1.02);
+        }
+
+        /* Footer Info */
+        .footer-info {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+            margin-top: 30px;
+        }
+
+        .hotkey {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 0 5px;
+            font-family: monospace;
+        }
+
+        /* Animasyonlar */
+        @keyframes glitchMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .control-buttons {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Glitch Arka Plan -->
+    <div class="glitch-bg"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-music"></i>
+                </div>
+                <div class="logo-text">ACHAW PLAYER</div>
+            </div>
+            
+            <div style="color: var(--text-secondary); font-size: 14px;">
+                <i class="fas fa-keyboard"></i> Görünmez Mod: <span class="hotkey">G</span> tuşu
+            </div>
+        </div>
+
+        <!-- SÜRÜKLƏ & TAŞI Alanı -->
+        <div class="drop-zone" id="dropZone">
+            <div class="drop-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <div class="drop-text">SÜRÜKLƏ & TAŞI</div>
+            <div class="drop-subtext">MP3 dosyalarını bu alana sürükleyin</div>
+        </div>
+
+        <!-- MENÜ -->
+        <div class="menu">
+            <div class="menu-header">
+                <div class="menu-title">
+                    <i class="fas fa-sliders-h"></i>
+                    MENÜ
+                </div>
+            </div>
+            
+            <div class="menu-content">
+                <!-- N.MP3 Bölümü -->
+                <div class="menu-section">
+                    <div class="section-title">
+                        <i class="fas fa-file-audio"></i>
+                        N.MP3
+                    </div>
+                    <div class="menu-items">
+                        <div class="menu-item active" id="mp3Upload">
+                            <div class="item-left">
+                                <div class="item-icon">
+                                    <i class="fas fa-upload"></i>
+                                </div>
+                                <div class="item-text">Standart (MP3) - MP3 YÜKLE</div>
+                            </div>
+                            <div class="item-right">
+                                <div class="badge">YENİ</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LIRIK AYARLARI -->
+                <div class="menu-section">
+                    <div class="section-title">
+                        <i class="fas fa-file-alt"></i>
+                        LIRIK AYARLARI
+                    </div>
+                    <div class="menu-items">
+                        <div class="menu-item" id="lyricsEdit">
+                            <div class="item-left">
+                                <div class="item-icon">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="item-text">LIRİKLERİ DEĞİŞTİR</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ARKA PLAN -->
+                <div class="menu-section">
+                    <div class="section-title">
+                        <i class="fas fa-image"></i>
+                        ARKA PLAN
+                    </div>
+                    <div class="menu-items">
+                        <div class="menu-item" id="bgVideo">
+                            <div class="item-left">
+                                <div class="item-icon">
+                                    <i class="fas fa-video"></i>
+                                </div>
+                                <div class="item-text">VİDEO</div>
+                            </div>
+                        </div>
+                        <div class="menu-item" id="bgPhoto">
+                            <div class="item-left">
+                                <div class="item-icon">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                                <div class="item-text">FOTOĞRAF</div>
+                            </div>
+                        </div>
+                        <div class="menu-item" id="bgGif">
+                            <div class="item-left">
+                                <div class="item-icon">
+                                    <i class="fas fa-film"></i>
+                                </div>
+                                <div class="item-text">GİF</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OPAKLIK -->
+                <div class="menu-section">
+                    <div class="section-title">
+                        <i class="fas fa-adjust"></i>
+                        OPAKLIK
+                    </div>
+                    <div class="menu-items">
+                        <div class="menu-item">
+                            <div class="item-left">
+                                <div class="item-icon">
+                                    <i class="fas fa-sliders-h"></i>
+                                </div>
+                                <div class="item-text">Opaklık Seviyesi</div>
+                            </div>
+                            <div class="item-right">
+                                <div class="switch" id="opacitySwitch">
+                                    <div class="switch-knob"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TERS RENK MODU -->
+                <div class="menu-section">
+                    <div class="section-title">
+                        <i class="fas fa-inverse"></i>
+                        TERS RENK MODU
+                    </div>
+                    <div class="menu-items">
+                        <div class="menu-item">
+                            <div class="item-left">
+                                <div class="item-icon">
+                                    <i class="fas fa-moon"></i>
+                                </div>
+                                <div class="item-text">Invert Colors</div>
+                            </div>
+                            <div class="item-right">
+                                <div class="switch" id="invertSwitch">
+                                    <div class="switch-knob"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SİFIRLA -->
+                <div class="menu-section">
+                    <div class="section-title">
+                        <i class="fas fa-redo"></i>
+                        SİFIRLA
+                    </div>
+                    <div class="menu-items">
+                        <div class="menu-item" id="resetBtn">
+                            <div class="item-left">
+                                <div class="item-icon" style="color: var(--danger);">
+                                    <i class="fas fa-trash"></i>
+                                </div>
+                                <div class="item-text">Tüm Ayarları Sıfırla</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Şarkı Player -->
+        <div class="player-section">
+            <div class="player-header">
+                <div class="now-playing">
+                    <div class="album-art"></div>
+                    <div class="song-info">
+                        <h3>nini nini nini</h3>
+                        <p>achaw • valla ya • achaw</p>
+                    </div>
+                </div>
+                <div style="color: var(--text-secondary);">
+                    <i class="fas fa-clock"></i> 3:45 / 4:20
+                </div>
+            </div>
+
+            <div class="player-controls">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+
+                <div class="control-buttons">
+                    <button class="control-btn">
+                        <i class="fas fa-step-backward"></i>
+                    </button>
+                    <button class="control-btn play">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="control-btn">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                    <button class="control-btn">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lyrics Display -->
+            <div class="lyrics-container" id="lyricsDisplay">
+                <div class="lyrics-line active">nini nini nini</div>
+                <div class="lyrics-line">achaw</div>
+                <div class="lyrics-line">valla ya</div>
+                <div class="lyrics-line">achaw</div>
+                <div class="lyrics-line">nininininininin</div>
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="footer-info">
+            <p>
+                <i class="fas fa-info-circle"></i> 
+                Görünmez Mod için <span class="hotkey">G</span> tuşuna basın • 
+                <span class="hotkey">Space</span> Oynat/Duraklat • 
+                <span class="hotkey">← →</span> Şarkı Değiştir
+            </p>
+            <p style="margin-top: 10px; color: #444;">
+                🎵 ACHAW PLAYER • Dark Mode Şarkı Player • v1.0
+            </p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎵 ACHAW PLAYER başlatılıyor...');
+            
+            // Tüm menü öğelerine tıklama event'i ekle
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Aktif öğeyi güncelle
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Öğe türüne göre işlem yap
+                    const text = this.querySelector('.item-text').textContent;
+                    console.log(`Menü öğesi seçildi: ${text}`);
+                    
+                    // Özel işlemler
+                    if (this.id === 'mp3Upload') {
+                        document.getElementById('dropZone').click();
+                    } else if (this.id === 'resetBtn') {
+                        if (confirm('Tüm ayarlar sıfırlanacak. Emin misiniz?')) {
+                            resetAllSettings();
+                        }
+                    }
+                });
+            });
+            
+            // Switch'ler
+            const switches = document.querySelectorAll('.switch');
+            switches.forEach(sw => {
+                sw.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const isActive = this.classList.contains('active');
+                    
+                    if (this.id === 'opacitySwitch') {
+                        document.body.style.opacity = isActive ? '0.9' : '1';
+                    } else if (this.id === 'invertSwitch') {
+                        document.body.style.filter = isActive ? 'invert(1)' : 'none';
+                    }
+                });
+            });
+            
+            // Sürükle bırak alanı
+            const dropZone = document.getElementById('dropZone');
+            
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            dropZone.addEventListener('dragleave', function() {
+                this.classList.remove('dragover');
+            });
+            
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload(files[0]);
+                }
+            });
+            
+            dropZone.addEventListener('click', function() {
+                // Gizli file input oluştur
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'audio/mp3,audio/*';
+                input.onchange = function(e) {
+                    if (e.target.files[0]) {
+                        handleFileUpload(e.target.files[0]);
+                    }
+                };
+                input.click();
+            });
+            
+            // G tuşu ile görünmez mod
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'g' || e.key === 'G') {
+                    toggleInvisibleMode();
+                }
+                
+                // Space tuşu ile play/pause
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    togglePlayPause();
+                }
+            });
+            
+            // Play butonu
+            const playBtn = document.querySelector('.control-btn.play');
+            playBtn.addEventListener('click', togglePlayPause);
+            
+            // Fonksiyonlar
+            function handleFileUpload(file) {
+                console.log(`Dosya yüklendi: ${file.name}`);
+                
+                // Dosya ismini göster
+                const songTitle = file.name.replace('.mp3', '');
+                document.querySelector('.song-info h3').textContent = songTitle;
+                
+                // Yükleme bildirimi
+                showNotification(`${file.name} yüklendi!`);
+            }
+            
+            function togglePlayPause() {
+                const playIcon = document.querySelector('.control-btn.play i');
+                const isPlaying = playIcon.classList.contains('fa-play');
+                
+                if (isPlaying) {
+                    playIcon.classList.remove('fa-play');
+                    playIcon.classList.add('fa-pause');
+                    console.log('Oynatılıyor...');
+                } else {
+                    playIcon.classList.remove('fa-pause');
+                    playIcon.classList.add('fa-play');
+                    console.log('Duraklatıldı...');
+                }
+            }
+            
+            function toggleInvisibleMode() {
+                document.body.style.opacity = document.body.style.opacity === '0.1' ? '1' : '0.1';
+                console.log('Görünmez mod: ' + (document.body.style.opacity === '0.1'));
+                
+                showNotification(
+                    document.body.style.opacity === '0.1' 
+                    ? 'Görünmez mod AKTİF' 
+                    : 'Görünmez mod PASİF'
+                );
+            }
+            
+            function resetAllSettings() {
+                // Tüm switch'leri sıfırla
+                switches.forEach(sw => {
+                    sw.classList.remove('active');
+                    sw.querySelector('.switch-knob').style.transform = '';
+                });
+                
+                // CSS reset
+                document.body.style.opacity = '1';
+                document.body.style.filter = 'none';
+                
+                // Şarkı bilgilerini sıfırla
+                document.querySelector('.song-info h3').textContent = 'nini nini nini';
+                
+                console.log('Tüm ayarlar sıfırlandı');
+                showNotification('Tüm ayarlar sıfırlandı!');
+            }
+            
+            function showNotification(message) {
+                // Basit bildirim
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: var(--accent);
+                    color: var(--bg-dark);
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    z-index: 1000;
+                    animation: fadeInOut 2s ease;
+                `;
+                
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 2000);
+            }
+            
+            // CSS için animation ekle
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translateY(10px); }
+                    10% { opacity: 1; transform: translateY(0); }
+                    90% { opacity: 1; transform: translateY(0); }
+                    100% { opacity: 0; transform: translateY(10px); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            console.log('✅ ACHAW PLAYER hazır!');
+            showNotification('ACHAW PLAYER hazır! 🎵');
+        });
+    </script>
+</body>
+</html>
